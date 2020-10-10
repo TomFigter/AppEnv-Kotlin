@@ -9,12 +9,12 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
-apply plugin: 'walle'
+//apply plugin: 'walle'
 
 static def getGitVersion() { return 'git rev-parse --short HEAD'.execute().text.trim() }
 
-def Properties localProperties = new Properties()
-localProperties.load(project.rootProject.file('local.properties').newDataInputStream())
+//def Properties localProperties = new Properties()
+//localProperties.load(project.rootProject.file('local.properties').newDataInputStream())
 
 android {
     compileSdkVersion 28
@@ -27,35 +27,35 @@ android {
         versionName "3.3.1." + getGitVersion()
     }
 
-    signingConfigs {
-        debug {
-            v1SigningEnabled true
-            v2SigningEnabled true
-
-            storeFile file( localProperties.getProperty('signing.config.debug.store.path'))
-            storePassword   localProperties.getProperty('signing.config.debug.store.pass1')
-            keyAlias        localProperties.getProperty('signing.config.debug.store.alias')
-            keyPassword     localProperties.getProperty('signing.config.debug.store.pass2')
-        }
-        release {
-            v1SigningEnabled true
-            v2SigningEnabled true
-
-            storeFile file( localProperties.getProperty('signing.config.release.store.path'))
-            storePassword   localProperties.getProperty('signing.config.release.store.pass1')
-            keyAlias        localProperties.getProperty('signing.config.release.store.alias')
-            keyPassword     localProperties.getProperty('signing.config.release.store.pass2')
-        }
-    }
+//    signingConfigs {
+//        debug {
+//            v1SigningEnabled true
+//            v2SigningEnabled true
+//
+//            storeFile file( localProperties.getProperty('signing.config.debug.store.path'))
+//            storePassword   localProperties.getProperty('signing.config.debug.store.pass1')
+//            keyAlias        localProperties.getProperty('signing.config.debug.store.alias')
+//            keyPassword     localProperties.getProperty('signing.config.debug.store.pass2')
+//        }
+//        release {
+//            v1SigningEnabled true
+//            v2SigningEnabled true
+//
+//            storeFile file( localProperties.getProperty('signing.config.release.store.path'))
+//            storePassword   localProperties.getProperty('signing.config.release.store.pass1')
+//            keyAlias        localProperties.getProperty('signing.config.release.store.alias')
+//            keyPassword     localProperties.getProperty('signing.config.release.store.pass2')
+//        }
+//    }
 
     buildTypes {
         debug {
-            signingConfig signingConfigs.debug
+//            signingConfig signingConfigs.debug
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
         release {
-            signingConfig signingConfigs.release
+//            signingConfig signingConfigs.release
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
@@ -64,11 +64,11 @@ android {
 
 // ./gradlew clean assembleReleaseChannels
 // ./gradlew clean assembleReleaseChannels -PchannelList=official,github
-walle {
-    apkOutputFolder = new File("${project.buildDir}/outputs/channels");
-    apkFileNameFormat = '${appName}-${packageName}-${channel}-${buildType}-v${versionName}-${versionCode}-${buildTime}.apk';
-    channelFile = new File("${project.getProjectDir()}/channel.txt")
-}
+//walle {
+//    apkOutputFolder = new File("${project.buildDir}/outputs/channels");
+//    apkFileNameFormat = '${appName}-${packageName}-${channel}-${buildType}-v${versionName}-${versionCode}-${buildTime}.apk';
+//    channelFile = new File("${project.getProjectDir()}/channel.txt")
+//}
 
 dependencies {
     compileOnly fileTree(include: ['*.jar'], dir: 'libs')

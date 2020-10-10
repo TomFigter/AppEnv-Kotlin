@@ -34,13 +34,13 @@ class Random {
     }
 
     enum class ANDROID_VERSION(val versionName: String, val versionCode: Int) {
-        ICE_CREAM_SANDWICH_MR1("4.0.3", Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1)  ,
-        JELLY_BEAN_MR1        ("4.2"  , Build.VERSION_CODES.JELLY_BEAN_MR1)          ,
-        KITKAT                ("4.4"  , Build.VERSION_CODES.KITKAT)                  ,
-        KITKAT_WATCH          ("4.4W" , Build.VERSION_CODES.KITKAT_WATCH)            ,
-        LOLLIPOP_MR1          ("5.0"  , Build.VERSION_CODES.LOLLIPOP_MR1)            ,
-        M                     ("6.0"  , Build.VERSION_CODES.M)                       ,
-        N                     ("7.0"  , Build.VERSION_CODES.N)                       ,
+        ICE_CREAM_SANDWICH_MR1("4.0.3", Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1),
+        JELLY_BEAN_MR1("4.2", Build.VERSION_CODES.JELLY_BEAN_MR1),
+        KITKAT("4.4", Build.VERSION_CODES.KITKAT),
+        KITKAT_WATCH("4.4W", Build.VERSION_CODES.KITKAT_WATCH),
+        LOLLIPOP_MR1("5.0", Build.VERSION_CODES.LOLLIPOP_MR1),
+        M("6.0", Build.VERSION_CODES.M),
+        N("7.0", Build.VERSION_CODES.N),
         ;
 
         companion object {
@@ -128,6 +128,10 @@ class Random {
         return RandomStringGenerator.Builder().withinRange('0'.toInt(), 'z'.toInt()).filteredBy(CharacterPredicates.LETTERS, CharacterPredicates.DIGITS).build().generate(RandomUtils.nextInt(10, 13))
     }
 
+    fun appTime(): String {
+        return "12345678900000"
+    }
+
     /**
      *
      */
@@ -159,11 +163,11 @@ class Random {
     /**
      *
      */
-    fun simOperator(simType: SIM_TYPE):String {
+    fun simOperator(simType: SIM_TYPE): String {
         return simType.simCode
     }
 
-    fun simCountryIso(simType: SIM_TYPE):String {
+    fun simCountryIso(simType: SIM_TYPE): String {
         return simType.simCountryIso
     }
 
@@ -185,7 +189,7 @@ class Random {
 
     fun wifiName(): String {
         val strings = arrayOf("TP-", "FAST_", "Tenda_", "TP-LINK_", "MERCURY_")
-        return strings[RandomUtils.nextInt(0, strings.size-1)] + RandomStringGenerator.Builder().withinRange('0'.toInt(), 'Z'.toInt()).filteredBy(CharacterPredicates.LETTERS, CharacterPredicates.DIGITS).build().generate(RandomUtils.nextInt(6, 8))
+        return strings[RandomUtils.nextInt(0, strings.size - 1)] + RandomStringGenerator.Builder().withinRange('0'.toInt(), 'Z'.toInt()).filteredBy(CharacterPredicates.LETTERS, CharacterPredicates.DIGITS).build().generate(RandomUtils.nextInt(6, 8))
     }
 
     fun wifiMacAddress(): String {
@@ -193,17 +197,19 @@ class Random {
     }
 
     fun randomAll(): JSONObject {
-        val buildManufacturerList   = Phones.Instance.phoneList.keys.toList()
+        val buildManufacturerList = Phones.Instance.phoneList.keys.toList()
         val buildManufacturerRandom = buildManufacturerList[RandomUtils.nextInt(0, buildManufacturerList.size)]
-        val buildModelList          = Phones.Instance.phoneList[buildManufacturerRandom]!!
-        val buildPhoneRandom        = buildModelList[RandomUtils.nextInt(0, buildModelList.size)]
-        val randomJsonObject        = JSONObject()
+        val buildModelList = Phones.Instance.phoneList[buildManufacturerRandom]!!
+        val buildPhoneRandom = buildModelList[RandomUtils.nextInt(0, buildModelList.size)]
+        val randomJsonObject = JSONObject()
 
         randomJsonObject.put("android.os.Build.ro.product.manufacturer", buildPhoneRandom.manufacturer)
         randomJsonObject.put("android.os.Build.ro.product.model", buildPhoneRandom.model)
         randomJsonObject.put("android.os.Build.ro.serialno", this.buildSerial())
         randomJsonObject.put("android.os.Build.VERSION.RELEASE", this.buildVersion())
 
+        randomJsonObject.put("android.content.pm.firstInstallTime",this.appTime())
+        randomJsonObject.put("android.content.pm.lastUpdateTime",this.appTime())
         randomJsonObject.put("android.os.SystemProperties.android_id", this.androidId())
 
         randomJsonObject.put("android.telephony.TelephonyManager.getLine1Number", this.simLine1Number())

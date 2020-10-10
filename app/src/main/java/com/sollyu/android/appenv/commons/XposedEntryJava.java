@@ -9,6 +9,9 @@
 package com.sollyu.android.appenv.commons;
 
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageItemInfo;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.net.NetworkInfo;
@@ -29,6 +32,7 @@ import org.json.JSONObject;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 
 import de.robv.android.xposed.IXposedHookLoadPackage;
@@ -47,6 +51,7 @@ public class XposedEntryJava implements IXposedHookLoadPackage {
 
     @Override
     public void handleLoadPackage(XC_LoadPackage.LoadPackageParam loadPackageParam) throws Throwable {
+        Log.i(TAG, "开始Xposed替换");
         ArrayList<String> ignoreApplicationList = new ArrayList<>();
         ignoreApplicationList.add("android");
         ignoreApplicationList.add("de.robv.android.xposed.installer");
@@ -222,8 +227,66 @@ public class XposedEntryJava implements IXposedHookLoadPackage {
         if (xposedPackageJson.has("android.content.res.language") || xposedPackageJson.has("android.content.res.display.dpi")) {
             XposedBridgeHookAllMethods(Resources.class, "updateConfiguration", new UpdateConfiguration(loadPackageParam, xposedPackageJson));
         }
+        Log.i(TAG, "马上进行ApplicationPackageManager操作");
+        Log.i(TAG, "firstTime->" + xposedPackageJson.has("android.content.pm.firstInstallTime"));
+        if (xposedPackageJson.has("android.content.pm.firstInstallTime")) {
+            XposedBridgeHookAllMethods(XposedHelpers.findClass("android.app.ApplicationPackageManager", loadPackageParam.classLoader),
+                    "getPackageInfo", new XC_MethodHook() {
+                        @Override
+                        protected void afterHookedMethod(MethodHookParam param) throws JSONException {
+                            PackageInfo packageInfo = (PackageInfo) param.getResult();
+                            Log.i(TAG, "查询包信息-->" + packageInfo.packageName);
+                            if (packageInfo != null) {
+                                packageInfo.firstInstallTime = Long.parseLong(xposedPackageJson.getString("android.content.pm.firstInstallTime"));
+                                Log.i(TAG, "包时间信息已修改");
+                            }
+                            //把修改后的List当作结果返回去
+                            param.setResult(packageInfo);
+                            Log.i(TAG, "目标包名修改结果已回填");
+                        }
+                    });
+        }
+        Log.i(TAG, "lastTime->" + xposedPackageJson.has("android.content.pm.lastUpdateTime"));
+        if (xposedPackageJson.has("android.content.pm.lastUpdateTime")) {
+            XposedBridgeHookAllMethods(XposedHelpers.findClass("android.app.ApplicationPackageManager", loadPackageParam.classLoader),
+                    "getPackageInfo", new XC_MethodHook() {
+                        @Override
+                        protected void afterHookedMethod(MethodHookParam param) throws JSONException {
+                            PackageInfo packageInfo = (PackageInfo) param.getResult();
+                            Log.i(TAG, "查询包信息-->" + packageInfo.packageName);
+                            if (packageInfo != null) {
+                                packageInfo.lastUpdateTime = Long.parseLong(xposedPackageJson.getString("android.content.pm.lastUpdateTime"));
+                                Log.i(TAG, "包时间信息已修改");
+                            }
+                            //把修改后的List当作结果返回去
+                            param.setResult(packageInfo);
+                            Log.i(TAG, "目标包名修改结果已回填");
+                        }
+                    });
+        }
 
+//        XposedBridgeHookAllMethods(XposedHelpers.findClass("android.app.ApplicationPackageManager", loadPackageParam.classLoader),
+//                "getPackageInfo", new XC_MethodHook() {
+//                    @Override
+//                    protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+//                        //自定义一个新的List用来接收原来的返回信息
+//                        PackageInfo packageInfo = (PackageInfo) param.getResult();
+//                        Log.i(TAG, "查询包信息-->" + packageInfo.packageName);
+//                        if (packageInfo != null) {
+//                            if (packageInfo.packageName.equals("com.fast.admot")) {
+//                                //找到了，修改该App的应用包名
+//                                packageInfo.firstInstallTime = 123456789;
+//                                packageInfo.lastUpdateTime = 987654321;
+//                                Log.i(TAG, "包时间信息已修改");
+//                            }
+//                        }
+//                        //把修改后的List当作结果返回去
+//                        param.setResult(packageInfo);
+//                        Log.i(TAG, "目标包名修改结果已回填");
+//                    }
+//                });
     }
+
 
     private void XposedBridgeHookAllMethods(Class<?> hookClass, String methodName, XC_MethodHook callback) {
         try {
@@ -322,7 +385,9 @@ public class XposedEntryJava implements IXposedHookLoadPackage {
                 "android.net.wifi.WifiInfo.getBSSID",
                 "android.net.wifi.WifiInfo.getMacAddress",
                 "android.content.res.language",
-                "android.content.res.display.dpi"
+                "android.content.res.display.dpi",
+                "android.content.pm.firstInstallTime",
+                "android.content.pm.lastUpdateTime"
         };
         for (String itemName : jsonKey) {
             try {
