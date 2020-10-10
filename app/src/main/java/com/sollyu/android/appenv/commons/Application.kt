@@ -71,9 +71,6 @@ class Application : android.app.Application(), Thread.UncaughtExceptionHandler {
 
         // 汇报机型
         PhoneReport.Instance.start()
-        var pc = packageManager.getPackageInfo("com.fast.admot", 0) as PackageInfo
-        Log.i("admot安装时间",pc.firstInstallTime.toString())
-        Log.i("admot更新时间",pc.lastUpdateTime.toString())
     }
 
     override fun uncaughtException(t: Thread?, throwable: Throwable?) {
