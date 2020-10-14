@@ -22,4 +22,5 @@ public class AppEnvConstants {
     public static final String URL_APPENV_SHARE_START      = URL_APPENV_HOST   + "/share";
     public static final String URL_APPENV_REPORT_PHONE     = URL_APPENV_HOST   + "/api/phone/report";
     public static final String URL_APPENV_REGISTER         = URL_APPENV_HOST   + "/api/register";
+
 }

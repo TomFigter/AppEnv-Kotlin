@@ -131,6 +131,9 @@ class Random {
     fun appTime(): String {
         return "12345678900000"
     }
+    fun genUA(): String {
+        return "Mozilla/5.0 (Linux; Android 5.0; SM-G900P Build/LRX21T) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.121 Mobile Safari/537.36"
+    }
 
     /**
      *
@@ -210,6 +213,7 @@ class Random {
 
         randomJsonObject.put("android.content.pm.firstInstallTime",this.appTime())
         randomJsonObject.put("android.content.pm.lastUpdateTime",this.appTime())
+        randomJsonObject.put("android.web.head.user.agent",this.genUA())
         randomJsonObject.put("android.os.SystemProperties.android_id", this.androidId())
 
         randomJsonObject.put("android.telephony.TelephonyManager.getLine1Number", this.simLine1Number())

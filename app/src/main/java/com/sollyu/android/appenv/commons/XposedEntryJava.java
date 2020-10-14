@@ -21,6 +21,8 @@ import android.os.Environment;
 import android.telephony.TelephonyManager;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
 
 import com.elvishew.xlog.XLog;
 import com.sollyu.android.appenv.BuildConfig;
@@ -264,27 +266,27 @@ public class XposedEntryJava implements IXposedHookLoadPackage {
                         }
                     });
         }
-
-//        XposedBridgeHookAllMethods(XposedHelpers.findClass("android.app.ApplicationPackageManager", loadPackageParam.classLoader),
-//                "getPackageInfo", new XC_MethodHook() {
-//                    @Override
-//                    protected void afterHookedMethod(MethodHookParam param) throws Throwable {
-//                        //自定义一个新的List用来接收原来的返回信息
-//                        PackageInfo packageInfo = (PackageInfo) param.getResult();
-//                        Log.i(TAG, "查询包信息-->" + packageInfo.packageName);
-//                        if (packageInfo != null) {
-//                            if (packageInfo.packageName.equals("com.fast.admot")) {
-//                                //找到了，修改该App的应用包名
-//                                packageInfo.firstInstallTime = 123456789;
-//                                packageInfo.lastUpdateTime = 987654321;
-//                                Log.i(TAG, "包时间信息已修改");
-//                            }
-//                        }
-//                        //把修改后的List当作结果返回去
-//                        param.setResult(packageInfo);
-//                        Log.i(TAG, "目标包名修改结果已回填");
-//                    }
-//                });
+        if (xposedPackageJson.has("android.web.head.user.agent") && !xposedPackageJson.optString("android.web.head.user.agent").isEmpty()) {
+            XposedBridgeHookAllMethods(System.class, "getProperty", new XC_MethodHook() {
+                /* access modifiers changed from: protected */
+                public void afterHookedMethod(XC_MethodHook.MethodHookParam methodHookParam) {
+                    if (methodHookParam.args[0].toString().equalsIgnoreCase("http.agent")) {
+                        Log.d("XposedEntry", "afterHookedMethod: ==== System BEFORE ====" + methodHookParam.getResult());
+                        methodHookParam.setResult(xposedPackageJson.optString("android.web.head.user.agent"));
+                        Log.d("XposedEntry", "afterHookedMethod: ==== System AFTER  ====" + methodHookParam.getResult());
+                    }
+                }
+            });
+            if (Build.VERSION.SDK_INT >= 17) {
+                XposedBridgeHookAllMethods(WebSettings.class, "getDefaultUserAgent", new MethodHookValue(xposedPackageJson.optString("android.web.head.user.agent")));
+            }
+            XposedBridgeHookAllMethods(WebView.class, "getSettings", new XC_MethodHook() {
+                /* access modifiers changed from: protected */
+                public void afterHookedMethod(XC_MethodHook.MethodHookParam methodHookParam) {
+                    XposedBridgeHookAllMethods(((WebSettings) methodHookParam.getResult()).getClass(), "getUserAgentString", new MethodHookValue(xposedPackageJson.optString("android.web.head.user.agent")));
+                }
+            });
+        }
     }
 
 
@@ -387,7 +389,8 @@ public class XposedEntryJava implements IXposedHookLoadPackage {
                 "android.content.res.language",
                 "android.content.res.display.dpi",
                 "android.content.pm.firstInstallTime",
-                "android.content.pm.lastUpdateTime"
+                "android.content.pm.lastUpdateTime",
+                "android.web.head.user.agent"
         };
         for (String itemName : jsonKey) {
             try {
